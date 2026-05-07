@@ -190,17 +190,26 @@ A BCH-powered ride service + mobile billboard driving real adoption on the groun
   <div class="small">
     Every contribution helps restore real-world Bitcoin Cash adoption in Mozambique.
   </div>
-  
-<script>
-  const raised = 1.012; // 🔁 UPDATE THIS MANUALLY
+  <script>
+  const raised = 1.012; // atualiza manualmente
   const goal = 2;
 
   const percent = (raised / goal) * 100;
 
-  document.getElementById("progressBar").style.width = percent + "%";
+  // animação da barra
+  setTimeout(() => {
+    document.getElementById("progressBar").style.width = percent + "%";
+  }, 200);
+
+  // texto BCH
   document.getElementById("progressText").innerText =
     raised + " BCH raised of " + goal + " BCH";
+
+  // percentagem visível (com 1 casa decimal)
+  document.getElementById("progressPercent").innerText =
+    percent.toFixed(1) + "% completed";
 </script>
+
 </div>
 
 </body>
