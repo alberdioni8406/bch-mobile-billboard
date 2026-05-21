@@ -144,12 +144,20 @@
 </style>
 
 <script>
-fetch('https://api.countapi.xyz/hit/bch-mobile-billboard/visits')
-  .then(res => res.json())
-  .then(res => {
-    document.getElementById('visits').innerText =
-      '👀 ' + res.value + ' community visits';
-  });
+let key = "bch-mobile-billboard-visits";
+
+let visits = localStorage.getItem(key);
+
+if (!visits) {
+  visits = 0;
+}
+
+visits++;
+
+localStorage.setItem(key, visits);
+
+document.getElementById("visits").innerText =
+  "👀 " + visits + " visits (local demo)";
 </script>
 
 <div class="subtitle">
