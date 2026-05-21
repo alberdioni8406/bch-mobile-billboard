@@ -103,58 +103,7 @@
 </head>
 
 <body>
-    <!-- BCH Community Counter -->
-<div class="counter-box">
-  <div class="counter-title"> BCH Mobile Billboard</div>
-  <div id="visits" class="counter-visits">
-    Loading visits...
-  </div>
-</div>
-
-<style>
-.counter-box {
-  background: rgba(0, 0, 0, 0.85);
-  border: 2px solid #00ff99;
-  border-radius: 15px;
-  padding: 15px;
-  width: fit-content;
-  margin-top: 20px;
-  box-shadow: 0 0 15px rgba(0, 255, 153, 0.5);
-  font-family: Arial, sans-serif;
-}
-
-.counter-title {
-  color: #00ff99;
-  font-size: 18px;
-  font-weight: bold;
-  margin-bottom: 8px;
-  text-shadow: 0 0 10px #00ff99;
-}
-
-.counter-visits {
-  color: white;
-  font-size: 22px;
-  font-weight: bold;
-}
-</style>
-
-<script>
-let key = "bch-mobile-billboard-visits";
-
-let visits = localStorage.getItem(key);
-
-if (!visits) {
-  visits = 0;
-}
-
-visits++;
-
-localStorage.setItem(key, visits);
-
-document.getElementById("visits").innerText =
-  "👁️ " + visits + " visits ";
-</script>
-
+  
 <div class="container">
   <img src="bch-car.jpg" class="hero-image" />
 
@@ -262,6 +211,38 @@ A BCH-powered ride service + mobile billboard driving real adoption on the groun
 </script>
 
 </div>
+<!-- BCH Footer Counter -->
+<footer class="counter-footer">
+  👁️ <span id="visits">Loading...</span> visits
+</footer>
 
+<style>
+.counter-footer {
+  margin-top: 40px;
+  padding: 10px 15px;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  color: #00ff99;
+  background: rgba(0, 0, 0, 0.6);
+  border-top: 1px solid rgba(0, 255, 153, 0.3);
+}
+</style>
+
+<script>
+let key = "bch-mobile-billboard-visits";
+
+let visits = localStorage.getItem(key);
+
+if (!visits) {
+  visits = 0;
+}
+
+visits++;
+
+localStorage.setItem(key, visits);
+
+document.getElementById("visits").innerText = visits;
+</script>
 </body>
 </html>
