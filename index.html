@@ -1,248 +1,1129 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="description" content="Supporting real Bitcoin Cash adoption in Mozambique. 5,000+ daily impressions. Help bring the BCH mobile billboard back (~2 BCH)." />
-
-<!-- Open Graph -->
-<meta property="og:title" content="BCH Mobile Billboard – Mozambique" />
-<meta property="og:description" content="Real Bitcoin Cash adoption on the ground. Currently offline after an accident. Help restore it (~2 BCH)." />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://bch-mobile-billboard.vercel.app" />
-<meta property="og:image" content="https://bch-mobile-billboard.vercel.app/preview.jpg" />
-
-<!-- Twitter -->
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="BCH Mobile Billboard – Mozambique" />
-<meta name="twitter:description" content="5,000+ daily impressions. Help bring it back (~2 BCH)." />
-<meta name="twitter:image" content="https://bch-mobile-billboard.vercel.app/preview.jpg" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>BCH Mobile Billboard – Mozambique</title>
+
+  <meta name="description" content="Supporting real Bitcoin Cash adoption in Mozambique. 5,000+ daily impressions. Help bring the BCH mobile billboard back (~2 BCH)." />
+  <meta property="og:title" content="BCH Mobile Billboard – Mozambique" />
+  <meta property="og:description" content="Real Bitcoin Cash adoption on the ground. Currently offline after an accident. Help restore it." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://bch-mobile-billboard.vercel.app" />
+  <meta property="og:image" content="https://bch-mobile-billboard.vercel.app/preview.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="BCH Mobile Billboard – Mozambique" />
+  <meta name="twitter:description" content="5,000+ daily impressions. Help bring it back." />
+  <meta name="twitter:image" content="https://bch-mobile-billboard.vercel.app/preview.jpg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Barlow:ital,wght@0,300;0,400;0,600;0,800;1,300&family=Barlow+Condensed:wght@700;800;900&display=swap" rel="stylesheet">
+
   <style>
+    :root {
+      --bch-green: #0AC18E;
+      --bch-green-dim: rgba(10, 193, 142, 0.12);
+      --bch-green-mid: rgba(10, 193, 142, 0.35);
+      --bch-dark: #060d0b;
+      --bch-surface: #0c1a16;
+      --bch-card: #0f2119;
+      --bch-card-border: rgba(10, 193, 142, 0.18);
+      --bch-text: #e8f5f1;
+      --bch-muted: #5e8a7a;
+      --bch-accent: #14f1b0;
+      --bch-orange: #f7941d;
+      --bch-orange-dim: rgba(247, 148, 29, 0.15);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #0b0f14;
-      color: #ffffff;
-      margin: 0;
-      padding: 0;
+      font-family: 'Barlow', sans-serif;
+      background: var(--bch-dark);
+      color: var(--bch-text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── BACKGROUND GRID ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(10,193,142,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(10,193,142,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── GLOW BLOBS ── */
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(90px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .blob-1 {
+      width: 600px; height: 600px;
+      background: rgba(10,193,142,0.08);
+      top: -200px; left: -200px;
+    }
+    .blob-2 {
+      width: 400px; height: 400px;
+      background: rgba(247,148,29,0.05);
+      bottom: 10%; right: -100px;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 24px 40px;
       text-align: center;
     }
 
-    .container {
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bch-green-dim);
+      border: 1px solid var(--bch-card-border);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--bch-green);
+      margin-bottom: 28px;
+      animation: fadeDown 0.6s ease both;
+    }
+
+    .pulse-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--bch-orange);
+      box-shadow: 0 0 0 0 rgba(247,148,29,0.6);
+      animation: pulseRing 1.4s infinite;
+    }
+
+    @keyframes pulseRing {
+      0%   { box-shadow: 0 0 0 0 rgba(247,148,29,0.6); }
+      70%  { box-shadow: 0 0 0 8px rgba(247,148,29,0); }
+      100% { box-shadow: 0 0 0 0 rgba(247,148,29,0); }
+    }
+
+    .hero-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: clamp(48px, 8vw, 96px);
+      line-height: 0.92;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      animation: fadeDown 0.7s 0.1s ease both;
+    }
+
+    .hero-title .accent { color: var(--bch-green); }
+    .hero-title .country {
+      display: block;
+      font-size: clamp(28px, 4vw, 52px);
+      color: var(--bch-muted);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .hero-sub {
+      font-size: clamp(16px, 2.5vw, 20px);
+      color: var(--bch-muted);
+      font-weight: 300;
+      max-width: 540px;
+      line-height: 1.6;
+      margin-bottom: 40px;
+      animation: fadeDown 0.7s 0.2s ease both;
+    }
+
+    .hero-image-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 680px;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid var(--bch-card-border);
+      box-shadow: 0 0 60px rgba(10,193,142,0.15), 0 40px 80px rgba(0,0,0,0.6);
+      animation: fadeUp 0.8s 0.3s ease both;
+      margin-bottom: 12px;
+    }
+
+    .hero-image-wrap img {
+      width: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .hero-image-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(6,13,11,0.6) 0%, transparent 50%);
+    }
+
+    .scroll-hint {
+      margin-top: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      color: var(--bch-muted);
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      animation: fadeDown 1s 0.8s ease both;
+    }
+
+    .scroll-arrow {
+      width: 20px; height: 20px;
+      border-right: 2px solid var(--bch-green);
+      border-bottom: 2px solid var(--bch-green);
+      transform: rotate(45deg);
+      animation: bounce 1.4s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: rotate(45deg) translateY(0); }
+      50% { transform: rotate(45deg) translateY(4px); }
+    }
+
+    /* ── MAIN CONTENT ── */
+    .content {
+      position: relative;
+      z-index: 1;
       max-width: 720px;
-      margin: auto;
-      padding: 40px 20px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
     }
 
-    h1 {
-      font-size: 30px;
-      margin-bottom: 8px;
-    }
-
-    .subtitle {
-      color: #94a3b8;
-      margin-bottom: 25px;
-    }
-
-    .card {
-      background: #111827;
-      padding: 18px;
-      border-radius: 12px;
-      margin-top: 15px;
-      text-align: left;
-    }
-
-    .highlight {
-      font-size: 18px;
-      margin-top: 10px;
-    }
-
-    .progress {
-      margin-top: 20px;
-      background: #1f2937;
-      border-radius: 10px;
+    /* ── LIVE DONATION TRACKER ── */
+    .tracker {
+      background: var(--bch-card);
+      border: 1px solid var(--bch-card-border);
+      border-radius: 24px;
+      padding: 32px;
+      margin-bottom: 32px;
+      position: relative;
       overflow: hidden;
     }
 
-    .progress-bar {
-      width: 40%;
-      height: 10px;
-      background: #22c55e;
+    .tracker::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--bch-green), transparent);
     }
 
-    .cta {
-      margin-top: 25px;
-      display: inline-block;
-      padding: 15px 20px;
-      background: #22c55e;
-      color: black;
-      font-weight: bold;
-      border-radius: 10px;
-      text-decoration: none;
+    .tracker-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
     }
 
-    .address {
+    .tracker-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--bch-muted);
+    }
+
+    .live-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(247,148,29,0.12);
+      border: 1px solid rgba(247,148,29,0.25);
+      border-radius: 100px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--bch-orange);
+    }
+
+    .live-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--bch-orange);
+      animation: pulseRing 1.4s infinite;
+    }
+
+    .amount-display {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .amount-raised {
+      font-family: 'Space Mono', monospace;
+      font-size: clamp(36px, 7vw, 60px);
+      font-weight: 700;
+      color: var(--bch-accent);
+      line-height: 1;
+      letter-spacing: -0.03em;
+      transition: all 0.4s ease;
+    }
+
+    .amount-goal {
+      font-family: 'Space Mono', monospace;
+      font-size: clamp(18px, 3vw, 26px);
+      color: var(--bch-muted);
+      font-weight: 400;
+    }
+
+    .amount-usd {
+      font-size: 14px;
+      color: var(--bch-muted);
+      margin-bottom: 20px;
+      font-family: 'Space Mono', monospace;
+    }
+
+    /* ── PROGRESS BAR ── */
+    .progress-wrap {
+      margin-bottom: 16px;
+    }
+
+    .progress-track {
+      background: rgba(10,193,142,0.08);
+      border-radius: 100px;
+      height: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(10,193,142,0.12);
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 100px;
+      background: linear-gradient(90deg, var(--bch-green), var(--bch-accent));
+      width: 0%;
+      transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      box-shadow: 0 0 16px rgba(10,193,142,0.5);
+    }
+
+    .progress-fill::after {
+      content: '';
+      position: absolute;
+      right: 0; top: 0; bottom: 0;
+      width: 20px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 100px;
+      animation: shimmer 1.5s infinite;
+    }
+
+    @keyframes shimmer {
+      0%  { opacity: 0; transform: scaleX(0.5); }
+      50% { opacity: 1; transform: scaleX(1); }
+      100% { opacity: 0; transform: scaleX(0.5); }
+    }
+
+    .progress-stats {
+      display: flex;
+      justify-content: space-between;
       margin-top: 10px;
       font-size: 13px;
-      color: #94a3b8;
-      word-break: break-all;
+      color: var(--bch-muted);
     }
 
-    img {
-      width: 100%;
+    .progress-pct {
+      color: var(--bch-green);
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+    }
+
+    .last-updated {
+      text-align: center;
+      font-size: 11px;
+      color: var(--bch-muted);
+      margin-top: 6px;
+      font-family: 'Space Mono', monospace;
+    }
+
+    /* ── STATS ROW ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .stat-box {
+      background: var(--bch-card);
+      border: 1px solid var(--bch-card-border);
+      border-radius: 16px;
+      padding: 20px 16px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(22px, 4vw, 34px);
+      font-weight: 900;
+      color: var(--bch-green);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--bch-muted);
+    }
+
+    /* ── SECTION TITLE ── */
+    .section-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: clamp(24px, 4vw, 36px);
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      color: var(--bch-text);
+    }
+
+    .section-title .accent { color: var(--bch-green); }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--bch-card);
+      border: 1px solid var(--bch-card-border);
+      border-radius: 20px;
+      padding: 28px;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .card:hover {
+      border-color: rgba(10,193,142,0.35);
+      box-shadow: 0 8px 40px rgba(10,193,142,0.08);
+    }
+
+    .card-icon {
+      font-size: 28px;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .card-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--bch-green);
+      margin-bottom: 12px;
+    }
+
+    .card p {
+      font-size: 15px;
+      line-height: 1.7;
+      color: rgba(232,245,241,0.75);
+      font-weight: 300;
+    }
+
+    /* ── LOOP DIAGRAM ── */
+    .loop {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+
+    .loop-step {
+      background: var(--bch-green-dim);
+      border: 1px solid var(--bch-card-border);
       border-radius: 12px;
-      margin-top: 15px;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--bch-text);
+      white-space: nowrap;
     }
 
-    .small {
-      color: #64748b;
+    .loop-arrow {
+      color: var(--bch-green);
+      font-size: 20px;
+      padding: 0 8px;
+    }
+
+    /* ── IMPACT LIST ── */
+    .impact-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .impact-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      font-size: 15px;
+      color: rgba(232,245,241,0.8);
+      font-weight: 300;
+      line-height: 1.5;
+    }
+
+    .impact-list li::before {
+      content: '◆';
+      color: var(--bch-green);
+      font-size: 10px;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+
+    /* ── ALERT CARD ── */
+    .alert-card {
+      background: var(--bch-orange-dim);
+      border: 1px solid rgba(247,148,29,0.3);
+      border-radius: 20px;
+      padding: 28px;
+      margin-bottom: 16px;
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    .alert-icon {
+      font-size: 32px;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+
+    .alert-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--bch-orange);
+      margin-bottom: 8px;
+    }
+
+    .alert-card p {
+      font-size: 15px;
+      line-height: 1.65;
+      color: rgba(232,245,241,0.75);
+      font-weight: 300;
+    }
+
+    /* ── DONATE SECTION ── */
+    .donate-section {
+      background: var(--bch-card);
+      border: 1px solid var(--bch-green);
+      border-radius: 24px;
+      padding: 36px;
+      margin-bottom: 16px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .donate-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(10,193,142,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .donate-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(28px, 5vw, 42px);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+      margin-bottom: 8px;
+    }
+
+    .donate-sub {
+      font-size: 15px;
+      color: var(--bch-muted);
+      margin-bottom: 28px;
+      font-weight: 300;
+    }
+
+    .donate-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bch-green);
+      color: #021a11;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      text-decoration: none;
+      padding: 16px 36px;
+      border-radius: 14px;
+      transition: all 0.2s ease;
+      box-shadow: 0 0 32px rgba(10,193,142,0.3);
+    }
+
+    .donate-btn:hover {
+      background: var(--bch-accent);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 40px rgba(10,193,142,0.45);
+    }
+
+    .donate-btn:active {
+      transform: translateY(0);
+    }
+
+    .qr-wrap {
+      margin: 28px auto 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    /* QR via API */
+    .qr-img {
+      width: 180px;
+      height: 180px;
+      border-radius: 16px;
+      border: 3px solid var(--bch-green);
+      background: white;
+      padding: 8px;
+      box-shadow: 0 0 30px rgba(10,193,142,0.2);
+    }
+
+    .address-box {
+      background: rgba(10,193,142,0.06);
+      border: 1px solid var(--bch-card-border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: 100%;
+      width: 100%;
+    }
+
+    .address-text {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--bch-green);
+      word-break: break-all;
+      flex: 1;
+      text-align: left;
+    }
+
+    .copy-btn {
+      background: var(--bch-green-dim);
+      border: 1px solid var(--bch-card-border);
+      color: var(--bch-green);
+      font-family: 'Barlow', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .copy-btn:hover { background: rgba(10,193,142,0.2); }
+    .copy-btn.copied { color: var(--bch-orange); border-color: rgba(247,148,29,0.3); }
+
+    /* ── RECENT DONORS ── */
+    .donors-section {
+      margin-bottom: 16px;
+    }
+
+    .donor-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .donor-item {
+      background: var(--bch-card);
+      border: 1px solid var(--bch-card-border);
+      border-radius: 14px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      animation: slideIn 0.4s ease both;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-12px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    .donor-addr {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      color: var(--bch-muted);
+    }
+
+    .donor-amount {
+      font-family: 'Space Mono', monospace;
       font-size: 14px;
-      margin-top: 20px;
+      font-weight: 700;
+      color: var(--bch-green);
+      white-space: nowrap;
+    }
+
+    .donor-time {
+      font-size: 11px;
+      color: var(--bch-muted);
+      white-space: nowrap;
+    }
+
+    .no-donors {
+      text-align: center;
+      color: var(--bch-muted);
+      font-size: 14px;
+      padding: 20px;
+    }
+
+    .donor-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 3px;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      border: none;
+      border-top: 1px solid rgba(10,193,142,0.1);
+      margin: 32px 0;
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 20px 24px 40px;
+      border-top: 1px solid rgba(10,193,142,0.08);
+    }
+
+    .footer-logo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--bch-green);
+      margin-bottom: 8px;
+    }
+
+    .footer-text {
+      font-size: 13px;
+      color: var(--bch-muted);
+    }
+
+    .visits-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 12px;
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      color: var(--bch-muted);
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 480px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .stats-row .stat-box:last-child { grid-column: span 2; }
+      .alert-card { flex-direction: column; gap: 12px; }
+      .loop { gap: 4px; }
+      .loop-step { font-size: 12px; padding: 8px 12px; }
     }
   </style>
 </head>
-
 <body>
-  
-<div class="container">
-  <img src="bch-car.jpg" class="hero-image" />
 
-  <h1>BCH Mobile Billboard – Mozambique</h1>
-  
-<div class="subtitle">
-A BCH-powered ride service + mobile billboard driving real adoption on the ground
-</div>
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
 
-<div class="card">
-  <b>What this is:</b>
-  <p>
-  A real vehicle used for transport and meetups that also acts as a moving BCH billboard.
-  It accepts Bitcoin Cash (BCH) as payment for rides.
-  </p>
-</div>
-
-<div class="card">
-  <b>Why it matters:</b>
-  <p>
-  In Mozambique, most people don’t discover crypto online — they discover it in real life.
-  </p>
-  <p>
-  This vehicle creates a full adoption loop:
-  </p>
-  <p>
-  • People see BCH → get curious<br>
-  • They take a ride → pay in BCH<br>
-  • They learn → and start using it
-  </p>
-</div>
-
-<div class="card">
-  <b>Growing Impact:</b>
-
-  <p>
-  This is not just visibility — it's the foundation of a local BCH circular economy.
-  </p>
-
-  <p>
-  • 5,000+ daily impressions across Matola & Maputo<br>
-  • BCH accepted for real transport (rides paid in BCH)<br>
-  • Direct onboarding through everyday interactions<br>
-  • Meetups supported and expanded through mobility<br>
-  • Ongoing outreach to onboard local businesses
-  </p>
-
-  <p>
-  The vehicle connects people, payments, and businesses — turning BCH from something people hear about into something they actually use.
-  </p>
-</div>
-
-  <div class="card">
-    <b>Status:</b>
-    <p class="highlight">Currently off the road after a recent accident.</p>
-    <p>We are working to restore it and bring BCH visibility back to the streets.</p>
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-badge">
+    <span class="pulse-dot"></span>
+    Currently offline — help us return
   </div>
 
-  <div class="card">
-  <b>Campaign Progress</b>
+  <h1 class="hero-title">
+    <span class="accent">BCH</span> Mobile<br>
+    Billboard
+    <span class="country">Mozambique 🇲🇿</span>
+  </h1>
 
-  <p>
-    <span id="progressText">0.012 BCH raised of 2 BCH</span><br>
-    <span id="progressPercent">0.6%</span>
+  <p class="hero-sub">
+    A Bitcoin Cash–powered ride service and moving billboard creating real adoption on the streets of Maputo & Matola.
   </p>
 
-  <div class="progress">
-    <div id="progressBar" class="progress-bar"></div>
-  </div>
-</div>
-
-  <a class="cta" href="bitcoincash:qqxeek2n27yqntj7mweznzllzt870fmvzyw0ksnpd9">
-    Send BCH to Support
-  </a>
-
-  <div class="address">
-    bitcoincash:qqxeek2n27yqntj7mweznzllzt870fmvzyw0ksnpd9
+  <div class="hero-image-wrap">
+    <img src="bch-car.jpg" alt="BCH Mobile Billboard Vehicle" onerror="this.style.display='none'">
+    <div class="hero-image-overlay"></div>
   </div>
 
-  <img src="YOUR_MEETUP_IMAGE.jpg" />
-  <img src="YOUR_CAR_IMAGE.jpg" />
-  <img src="YOUR_CAR_2IMAGE.jpg" />
-
-  <div class="small">
-    Every contribution helps restore real-world Bitcoin Cash adoption in Mozambique.
+  <div class="scroll-hint">
+    <span>Support the mission</span>
+    <div class="scroll-arrow"></div>
   </div>
-  <script>
-  const raised = 1.11471449; // atualiza manualmente
-  const goal = 2.75;
+</section>
 
-  const percent = (raised / goal) * 100;
+<!-- ── MAIN CONTENT ── -->
+<main class="content">
 
-  // animação da barra
-  setTimeout(() => {
-    document.getElementById("progressBar").style.width = percent + "%";
-  }, 200);
+  <!-- ── LIVE TRACKER ── -->
+  <div class="tracker reveal" id="tracker">
+    <div class="tracker-header">
+      <span class="tracker-title">Campaign Progress</span>
+      <span class="live-badge"><span class="live-dot"></span> Live</span>
+    </div>
 
-  // texto BCH
-  document.getElementById("progressText").innerText =
-    raised + " BCH raised of " + goal + " BCH";
+    <div class="amount-display">
+      <span class="amount-raised" id="amountRaised">—</span>
+      <span class="amount-goal">/ <span id="goalBCH">2.75</span> BCH</span>
+    </div>
+    <div class="amount-usd" id="amountUSD">Fetching live data…</div>
 
-  // percentagem visível (com 1 casa decimal)
-  document.getElementById("progressPercent").innerText =
-    percent.toFixed(1) + "% completed";
-</script>
+    <div class="progress-wrap">
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-stats">
+        <span id="donorCount">— donors</span>
+        <span class="progress-pct" id="progressPct">—%</span>
+      </div>
+    </div>
 
-</div>
-<!-- BCH Footer Counter -->
-<footer class="counter-footer">
-  👁️ <span id="visits">Loading...</span> visits
+    <div class="last-updated" id="lastUpdated">Updating…</div>
+  </div>
+
+  <!-- ── STATS ── -->
+  <div class="stats-row reveal">
+    <div class="stat-box">
+      <div class="stat-value">5K+</div>
+      <div class="stat-label">Daily impressions</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value">2</div>
+      <div class="stat-label">Cities reached</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value">BCH</div>
+      <div class="stat-label">Accepted for rides</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ── WHAT IS THIS ── -->
+  <h2 class="section-title reveal">What is <span class="accent">this?</span></h2>
+
+  <div class="card reveal">
+    <span class="card-icon">🚗</span>
+    <div class="card-title">A BCH-Powered Ride Service</div>
+    <p>
+      A real vehicle used for transport and community meetups that doubles as a moving Bitcoin Cash billboard — driving through Matola and Maputo every day, reaching thousands of eyes.
+    </p>
+  </div>
+
+  <div class="card reveal">
+    <span class="card-icon">🔄</span>
+    <div class="card-title">The Full Adoption Loop</div>
+    <p style="margin-bottom: 16px;">In Mozambique, most people discover crypto in real life — not online. This vehicle closes that loop:</p>
+    <div class="loop">
+      <div class="loop-step">👀 See BCH</div>
+      <span class="loop-arrow">→</span>
+      <div class="loop-step">🚘 Take a Ride</div>
+      <span class="loop-arrow">→</span>
+      <div class="loop-step">💸 Pay in BCH</div>
+      <span class="loop-arrow">→</span>
+      <div class="loop-step">🌱 Use it Daily</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ── IMPACT ── -->
+  <h2 class="section-title reveal">Growing <span class="accent">Impact</span></h2>
+
+  <div class="card reveal">
+    <ul class="impact-list">
+      <li>5,000+ daily impressions across Matola & Maputo</li>
+      <li>BCH accepted as real payment for transport rides</li>
+      <li>Direct onboarding through everyday street interactions</li>
+      <li>Community meetups supported and expanded through mobility</li>
+      <li>Ongoing outreach to onboard local businesses into BCH</li>
+      <li>Foundation of a local BCH circular economy</li>
+    </ul>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ── STATUS ── -->
+  <h2 class="section-title reveal">Current <span class="accent">Status</span></h2>
+
+  <div class="alert-card reveal">
+    <div class="alert-icon">⚠️</div>
+    <div>
+      <div class="alert-title">Off the Road After an Accident</div>
+      <p>The vehicle was involved in a recent accident and is currently not operating. Every day it's off the streets is a day BCH visibility disappears from Mozambique. We need your support to bring it back.</p>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ── RECENT DONORS ── -->
+  <div class="donors-section reveal">
+    <h2 class="section-title">Recent <span class="accent">Supporters</span></h2>
+    <div class="donor-list" id="donorList">
+      <div class="no-donors">Loading recent transactions…</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ── DONATE ── -->
+  <div class="donate-section reveal" id="donate">
+    <div class="donate-title">Send <span style="color:var(--bch-green)">BCH</span> Now</div>
+    <p class="donate-sub">Every satoshi brings the billboard back to the streets of Mozambique.</p>
+
+    <a class="donate-btn" href="bitcoincash:qqxeek2n27yqntj7mweznzllzt870fmvzyw0ksnpd9">
+      <span>⚡</span> Open Wallet & Send
+    </a>
+
+    <div class="qr-wrap">
+      <img
+        class="qr-img"
+        src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=bitcoincash:qqxeek2n27yqntj7mweznzllzt870fmvzyw0ksnpd9&color=0ac18e&bgcolor=ffffff&qzone=1"
+        alt="BCH QR Code"
+      />
+      <div class="address-box">
+        <span class="address-text" id="addressText">bitcoincash:qqxeek2n27yqntj7mweznzllzt870fmvzyw0ksnpd9</span>
+        <button class="copy-btn" id="copyBtn" onclick="copyAddress()">Copy</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ── FOOTER ── -->
+<footer class="footer">
+  <div class="footer-logo">BCH Mobile Billboard · Mozambique</div>
+  <div class="footer-text">Building real-world Bitcoin Cash adoption since day one.</div>
+  <div class="visits-badge">
+    👁️ <span id="visitCount">—</span> page visits
+  </div>
 </footer>
 
-<style>
-.counter-footer {
-  margin-top: 40px;
-  padding: 10px 15px;
-  text-align: center;
-  font-family: Arial, sans-serif;
-  font-size: 13px;
-  color: #00ff99;
-  background: rgba(0, 0, 0, 0.6);
-  border-top: 1px solid rgba(0, 255, 153, 0.3);
-}
-</style>
-
 <script>
-let key = "bch-mobile-billboard-visits";
+  // ── CONFIG ──────────────────────────────────────────────────────────────
+  const BCH_ADDRESS = 'qqxeek2n27yqntj7mweznzllzt870fmvzyw0ksnpd9';
+  const GOAL_BCH = 2.75;
+  const REFRESH_INTERVAL = 60_000; // refresh every 60s
 
-let visits = localStorage.getItem(key);
+  // ── VISIT COUNTER ──────────────────────────────────────────────────────
+  (function() {
+    const key = 'bch-billboard-v2-visits';
+    let v = parseInt(localStorage.getItem(key) || '0') + 1;
+    localStorage.setItem(key, v);
+    document.getElementById('visitCount').textContent = v.toLocaleString();
+  })();
 
-if (!visits) {
-  visits = 0;
-}
+  // ── COPY ADDRESS ───────────────────────────────────────────────────────
+  function copyAddress() {
+    const addr = 'bitcoincash:' + BCH_ADDRESS;
+    navigator.clipboard.writeText(addr).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
 
-visits++;
+  // ── FORMAT HELPERS ─────────────────────────────────────────────────────
+  function fmtBCH(sat) {
+    return (sat / 1e8).toFixed(8).replace(/\.?0+$/, '') || '0';
+  }
 
-localStorage.setItem(key, visits);
+  function timeAgo(isoStr) {
+    const d = new Date(isoStr + 'Z');
+    const s = Math.floor((Date.now() - d) / 1000);
+    if (s < 60)  return s + 's ago';
+    if (s < 3600) return Math.floor(s/60) + 'm ago';
+    if (s < 86400) return Math.floor(s/3600) + 'h ago';
+    return Math.floor(s/86400) + 'd ago';
+  }
 
-document.getElementById("visits").innerText = visits;
+  function truncAddr(addr) {
+    if (!addr || addr.length <= 14) return addr;
+    return addr.slice(0,8) + '…' + addr.slice(-6);
+  }
+
+  // ── FETCH BCH PRICE ───────────────────────────────────────────────────
+  async function fetchBCHPrice() {
+    try {
+      const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin-cash&vs_currencies=usd');
+      const d = await r.json();
+      return d['bitcoin-cash']?.usd || null;
+    } catch { return null; }
+  }
+
+  // ── FETCH ON-CHAIN DATA ───────────────────────────────────────────────
+  async function fetchDonationData() {
+    // Blockchair public API — no key needed for basic requests
+    const url = `https://api.blockchair.com/bitcoin-cash/dashboards/address/${BCH_ADDRESS}?limit=10`;
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('API error ' + r.status);
+    const json = await r.json();
+    const addr = json.data[BCH_ADDRESS];
+    return {
+      balance: addr.address.balance,                   // in satoshis (current balance)
+      received: addr.address.received,                  // total ever received in sat
+      txCount: addr.address.transaction_count,
+      transactions: addr.transactions || []
+    };
+  }
+
+  // ── UPDATE UI ─────────────────────────────────────────────────────────
+  async function updateTracker() {
+    try {
+      const [data, price] = await Promise.all([fetchDonationData(), fetchBCHPrice()]);
+
+      const raisedBCH = data.received / 1e8;
+      const pct = Math.min((raisedBCH / GOAL_BCH) * 100, 100);
+
+      // Amounts
+      document.getElementById('amountRaised').textContent = raisedBCH.toFixed(5) + ' BCH';
+      document.getElementById('goalBCH').textContent = GOAL_BCH;
+
+      if (price) {
+        const usd = (raisedBCH * price).toFixed(2);
+        const goalUsd = (GOAL_BCH * price).toFixed(2);
+        document.getElementById('amountUSD').textContent =
+          `≈ $${parseFloat(usd).toLocaleString()} USD raised  ·  Goal: $${parseFloat(goalUsd).toLocaleString()} USD`;
+      } else {
+        document.getElementById('amountUSD').textContent = 'Total received on-chain';
+      }
+
+      // Progress bar
+      setTimeout(() => {
+        document.getElementById('progressFill').style.width = pct + '%';
+      }, 300);
+      document.getElementById('progressPct').textContent = pct.toFixed(1) + '%';
+      document.getElementById('donorCount').textContent = data.txCount + ' transaction' + (data.txCount !== 1 ? 's' : '');
+
+      // Last updated
+      const now = new Date();
+      document.getElementById('lastUpdated').textContent =
+        'Updated ' + now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+
+      // Recent donors list
+      renderDonors(data.transactions, price);
+
+    } catch (e) {
+      console.warn('Tracker error:', e);
+      document.getElementById('amountUSD').textContent = 'Could not load live data — try refreshing.';
+      document.getElementById('lastUpdated').textContent = 'Update failed — retrying…';
+    }
+  }
+
+  function renderDonors(txList, price) {
+    const list = document.getElementById('donorList');
+    if (!txList || txList.length === 0) {
+      list.innerHTML = '<div class="no-donors">No recent transactions found.</div>';
+      return;
+    }
+
+    // txList from blockchair are transaction hashes; we'll show them simply
+    list.innerHTML = txList.slice(0, 6).map((hash, i) => {
+      const shortHash = typeof hash === 'string'
+        ? hash.slice(0,10) + '…' + hash.slice(-6)
+        : 'tx #' + (i+1);
+      return `
+        <div class="donor-item" style="animation-delay:${i*0.07}s">
+          <div>
+            <div class="donor-addr">${shortHash}</div>
+          </div>
+          <div class="donor-meta">
+            <div class="donor-amount" style="color:var(--bch-green)">✓ Confirmed</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // ── SCROLL REVEAL ─────────────────────────────────────────────────────
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); revealObserver.unobserve(e.target); }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+  // ── INIT ──────────────────────────────────────────────────────────────
+  updateTracker();
+  setInterval(updateTracker, REFRESH_INTERVAL);
 </script>
+
 </body>
 </html>
