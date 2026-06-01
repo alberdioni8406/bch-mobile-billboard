@@ -976,153 +976,217 @@
 </footer>
 
 <script>
-  // ── CONFIG ──────────────────────────────────────────────────────────────
-  const BCH_ADDRESS = 'qqxeek2n27yqntj7mweznzllzt870fmvzyw0ksnpd9';
-  const GOAL_BCH = 2.75;
-  const REFRESH_INTERVAL = 60_000; // refresh every 60s
+ // ── CONFIG ──────────────────────────────────────────────────────────────
+const BCH_ADDRESS = 'qqxeek2n27yqntj7mweznzllzt870fmvzyw0ksnpd9';
+const GOAL_BCH = 2.75;
+const REFRESH_INTERVAL = 60_000;
 
-  // ── VISIT COUNTER ──────────────────────────────────────────────────────
-  (function() {
-    const key = 'bch-billboard-v2-visits';
-    let v = parseInt(localStorage.getItem(key) || '0') + 1;
-    localStorage.setItem(key, v);
-    document.getElementById('visitCount').textContent = v.toLocaleString();
-  })();
+// ── VISIT COUNTER ──────────────────────────────────────────────────────
+(function() {
+  const key = 'bch-billboard-v2-visits';
+  let v = parseInt(localStorage.getItem(key) || '0') + 1;
+  localStorage.setItem(key, v);
+  document.getElementById('visitCount').textContent = v.toLocaleString();
+})();
 
-  // ── COPY ADDRESS ───────────────────────────────────────────────────────
-  function copyAddress() {
-    const addr = 'bitcoincash:' + BCH_ADDRESS;
-    navigator.clipboard.writeText(addr).then(() => {
-      const btn = document.getElementById('copyBtn');
-      btn.textContent = 'Copied!';
-      btn.classList.add('copied');
-      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
-    });
+// ── COPY ADDRESS ───────────────────────────────────────────────────────
+function copyAddress() {
+  const addr = 'bitcoincash:' + BCH_ADDRESS;
+  navigator.clipboard.writeText(addr).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// ── FORMAT HELPERS ─────────────────────────────────────────────────────
+function fmtBCH(sat) {
+  return (sat / 1e8).toFixed(5);
+}
+
+function timeAgo(timestamp) {
+  // timestamp can be unix int or ISO string
+  const ts = typeof timestamp === 'number' ? timestamp : Math.floor(new Date(timestamp).getTime() / 1000);
+  const s = Math.floor(Date.now() / 1000 - ts);
+  if (s < 60)    return s + 's ago';
+  if (s < 3600)  return Math.floor(s / 60) + 'm ago';
+  if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+  return Math.floor(s / 86400) + 'd ago';
+}
+
+// ── FETCH BCH PRICE ───────────────────────────────────────────────────
+async function fetchBCHPrice() {
+  try {
+    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin-cash&vs_currencies=usd');
+    const d = await r.json();
+    return d['bitcoin-cash']?.usd || null;
+  } catch { return null; }
+}
+
+// ── PRIMARY API: electroncash.de (CORS-safe, no key needed) ───────────
+async function fetchDonationData() {
+  const base = `https://electroncash.de/api/address/${BCH_ADDRESS}`;
+
+  const [addrRes, txRes] = await Promise.all([
+    fetch(base + '/', { cache: 'no-store' }),
+    fetch(base + '/transactions/', { cache: 'no-store' })
+  ]);
+
+  if (!addrRes.ok) throw new Error('electroncash.de addr failed: ' + addrRes.status);
+  const addrData = await addrRes.json();
+
+  let txList = [];
+  if (txRes.ok) {
+    const txData = await txRes.json();
+    // Each tx object has: hash, block_time, received (in BCH float)
+    txList = (txData.transactions || []).slice(0, 6).map(tx => ({
+      hash: tx.hash || tx.txid || '',
+      time: tx.block_time || tx.time || null,
+      received: tx.received != null ? Math.round(tx.received * 1e8) : null
+    }));
   }
 
-  // ── FORMAT HELPERS ─────────────────────────────────────────────────────
-  function fmtBCH(sat) {
-    return (sat / 1e8).toFixed(8).replace(/\.?0+$/, '') || '0';
-  }
+  return {
+    received: Math.round((addrData.total_received || 0) * 1e8),
+    txCount: addrData.n_tx || 0,
+    transactions: txList
+  };
+}
 
-  function timeAgo(isoStr) {
-    const d = new Date(isoStr + 'Z');
-    const s = Math.floor((Date.now() - d) / 1000);
-    if (s < 60)  return s + 's ago';
-    if (s < 3600) return Math.floor(s/60) + 'm ago';
-    if (s < 86400) return Math.floor(s/3600) + 'h ago';
-    return Math.floor(s/86400) + 'd ago';
-  }
+// ── FALLBACK: blockchair with transaction details ──────────────────────
+async function fetchDonationDataFallback() {
+  const url = `https://api.blockchair.com/bitcoin-cash/dashboards/address/${BCH_ADDRESS}?limit=10&transaction_details=true`;
+  const r = await fetch(url, { cache: 'no-store' });
+  if (!r.ok) throw new Error('blockchair failed: ' + r.status);
+  const json = await r.json();
+  const addr = json.data[BCH_ADDRESS];
 
-  function truncAddr(addr) {
-    if (!addr || addr.length <= 14) return addr;
-    return addr.slice(0,8) + '…' + addr.slice(-6);
-  }
+  const txDetails = addr.transactions_details || [];
+  const txList = txDetails.map(tx => ({
+    hash: tx.hash || '',
+    time: tx.time ? Math.floor(new Date(tx.time).getTime() / 1000) : null,
+    received: tx.value_received || null
+  }));
 
-  // ── FETCH BCH PRICE ───────────────────────────────────────────────────
-  async function fetchBCHPrice() {
+  return {
+    received: addr.address.received,
+    txCount: addr.address.transaction_count,
+    transactions: txList.slice(0, 6)
+  };
+}
+
+// ── SECOND FALLBACK: bch-explorer / fulcrum ───────────────────────────
+async function fetchDonationDataFallback2() {
+  // bch.info API — another public CORS-open endpoint
+  const r = await fetch(`https://bch.info/api/address/${BCH_ADDRESS}`, { cache: 'no-store' });
+  if (!r.ok) throw new Error('bch.info failed: ' + r.status);
+  const d = await r.json();
+  return {
+    received: Math.round((d.total_received || 0) * 1e8),
+    txCount: d.n_tx || 0,
+    transactions: []
+  };
+}
+
+// ── UPDATE UI ─────────────────────────────────────────────────────────
+async function updateTracker() {
+  let data;
+  try {
+    data = await fetchDonationData();
+  } catch (e1) {
+    console.warn('Primary API failed:', e1.message);
     try {
-      const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin-cash&vs_currencies=usd');
-      const d = await r.json();
-      return d['bitcoin-cash']?.usd || null;
-    } catch { return null; }
-  }
-
-  // ── FETCH ON-CHAIN DATA ───────────────────────────────────────────────
-  async function fetchDonationData() {
-    // Blockchair public API — no key needed for basic requests
-    const url = `https://api.blockchair.com/bitcoin-cash/dashboards/address/${BCH_ADDRESS}?limit=10`;
-    const r = await fetch(url);
-    if (!r.ok) throw new Error('API error ' + r.status);
-    const json = await r.json();
-    const addr = json.data[BCH_ADDRESS];
-    return {
-      balance: addr.address.balance,                   // in satoshis (current balance)
-      received: addr.address.received,                  // total ever received in sat
-      txCount: addr.address.transaction_count,
-      transactions: addr.transactions || []
-    };
-  }
-
-  // ── UPDATE UI ─────────────────────────────────────────────────────────
-  async function updateTracker() {
-    try {
-      const [data, price] = await Promise.all([fetchDonationData(), fetchBCHPrice()]);
-
-      const raisedBCH = data.received / 1e8;
-      const pct = Math.min((raisedBCH / GOAL_BCH) * 100, 100);
-
-      // Amounts
-      document.getElementById('amountRaised').textContent = raisedBCH.toFixed(5) + ' BCH';
-      document.getElementById('goalBCH').textContent = GOAL_BCH;
-
-      if (price) {
-        const usd = (raisedBCH * price).toFixed(2);
-        const goalUsd = (GOAL_BCH * price).toFixed(2);
-        document.getElementById('amountUSD').textContent =
-          `≈ $${parseFloat(usd).toLocaleString()} USD raised  ·  Goal: $${parseFloat(goalUsd).toLocaleString()} USD`;
-      } else {
-        document.getElementById('amountUSD').textContent = 'Total received on-chain';
+      data = await fetchDonationDataFallback();
+    } catch (e2) {
+      console.warn('Blockchair fallback failed:', e2.message);
+      try {
+        data = await fetchDonationDataFallback2();
+      } catch (e3) {
+        console.error('All APIs failed:', e3.message);
+        document.getElementById('amountUSD').textContent = 'Live data temporarily unavailable — will auto-retry.';
+        document.getElementById('lastUpdated').textContent = 'Update failed — retrying in 60s…';
+        document.getElementById('donorList').innerHTML =
+          '<div class="no-donors">APIs are rate-limited right now. Data will reload automatically.</div>';
+        return;
       }
-
-      // Progress bar
-      setTimeout(() => {
-        document.getElementById('progressFill').style.width = pct + '%';
-      }, 300);
-      document.getElementById('progressPct').textContent = pct.toFixed(1) + '%';
-      document.getElementById('donorCount').textContent = data.txCount + ' transaction' + (data.txCount !== 1 ? 's' : '');
-
-      // Last updated
-      const now = new Date();
-      document.getElementById('lastUpdated').textContent =
-        'Updated ' + now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-
-      // Recent donors list
-      renderDonors(data.transactions, price);
-
-    } catch (e) {
-      console.warn('Tracker error:', e);
-      document.getElementById('amountUSD').textContent = 'Could not load live data — try refreshing.';
-      document.getElementById('lastUpdated').textContent = 'Update failed — retrying…';
     }
   }
 
-  function renderDonors(txList, price) {
-    const list = document.getElementById('donorList');
-    if (!txList || txList.length === 0) {
-      list.innerHTML = '<div class="no-donors">No recent transactions found.</div>';
-      return;
-    }
+  const price = await fetchBCHPrice();
 
-    // txList from blockchair are transaction hashes; we'll show them simply
-    list.innerHTML = txList.slice(0, 6).map((hash, i) => {
-      const shortHash = typeof hash === 'string'
-        ? hash.slice(0,10) + '…' + hash.slice(-6)
-        : 'tx #' + (i+1);
-      return `
-        <div class="donor-item" style="animation-delay:${i*0.07}s">
-          <div>
-            <div class="donor-addr">${shortHash}</div>
-          </div>
-          <div class="donor-meta">
-            <div class="donor-amount" style="color:var(--bch-green)">✓ Confirmed</div>
-          </div>
-        </div>`;
-    }).join('');
+  const raisedBCH = data.received / 1e8;
+  const pct = Math.min((raisedBCH / GOAL_BCH) * 100, 100);
+
+  document.getElementById('amountRaised').textContent = raisedBCH.toFixed(5) + ' BCH';
+  document.getElementById('goalBCH').textContent = GOAL_BCH;
+
+  if (price) {
+    const usd = (raisedBCH * price).toFixed(2);
+    const goalUsd = (GOAL_BCH * price).toFixed(2);
+    document.getElementById('amountUSD').textContent =
+      `≈ $${parseFloat(usd).toLocaleString()} USD raised  ·  Goal: $${parseFloat(goalUsd).toLocaleString()} USD`;
+  } else {
+    document.getElementById('amountUSD').textContent = 'Total received on-chain';
   }
 
-  // ── SCROLL REVEAL ─────────────────────────────────────────────────────
-  const revealObserver = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) { e.target.classList.add('visible'); revealObserver.unobserve(e.target); }
-    });
-  }, { threshold: 0.12 });
+  setTimeout(() => {
+    document.getElementById('progressFill').style.width = pct + '%';
+  }, 300);
+  document.getElementById('progressPct').textContent = pct.toFixed(1) + '%';
+  document.getElementById('donorCount').textContent =
+    data.txCount + ' transaction' + (data.txCount !== 1 ? 's' : '');
 
-  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+  const now = new Date();
+  document.getElementById('lastUpdated').textContent =
+    'Updated ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  // ── INIT ──────────────────────────────────────────────────────────────
-  updateTracker();
-  setInterval(updateTracker, REFRESH_INTERVAL);
+  renderDonors(data.transactions, price);
+}
+
+function renderDonors(txList, price) {
+  const list = document.getElementById('donorList');
+  if (!txList || txList.length === 0) {
+    list.innerHTML = '<div class="no-donors">No transactions found yet — be the first!</div>';
+    return;
+  }
+
+  list.innerHTML = txList.map((tx, i) => {
+    const hash = typeof tx === 'string' ? tx : (tx.hash || '');
+    const shortHash = hash ? hash.slice(0, 8) + '…' + hash.slice(-6) : `tx #${i + 1}`;
+    const hasAmount = tx.received != null && tx.received > 0;
+    const amountStr = hasAmount ? fmtBCH(tx.received) + ' BCH' : '✓ Confirmed';
+    const amountColor = hasAmount ? 'var(--bch-green)' : 'var(--bch-muted)';
+    const timeStr = tx.time ? timeAgo(tx.time) : '';
+    const usdStr = hasAmount && price ? `≈ $${((tx.received / 1e8) * price).toFixed(2)}` : '';
+
+    return `
+      <div class="donor-item" style="animation-delay:${i * 0.07}s">
+        <div>
+          <div class="donor-addr">${shortHash}</div>
+          ${timeStr ? `<div class="donor-time">${timeStr}</div>` : ''}
+        </div>
+        <div class="donor-meta">
+          <div class="donor-amount" style="color:${amountColor}">${amountStr}</div>
+          ${usdStr ? `<div class="donor-time">${usdStr}</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── SCROLL REVEAL ─────────────────────────────────────────────────────
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); revealObserver.unobserve(e.target); }
+  });
+}, { threshold: 0.12 });
+
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+// ── INIT ──────────────────────────────────────────────────────────────
+updateTracker();
+setInterval(updateTracker, REFRESH_INTERVAL);
+  
 </script>
 
 </body>
